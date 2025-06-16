@@ -16,4 +16,6 @@ namespace Application.DTO
         public PeriodDateTime UserPeriod { get; set; }
         public PeriodDateTime CollaboratorPeriod { get; set; }
     }
+
+    // boas
 }
