@@ -19,7 +19,15 @@ public class CollaboratorController : ControllerBase
         _collabService = collabService;
     }
 
-    [HttpPost]
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Guid>>> Get()
+    {
+        var collaborators = await _collabService.GetAll();
+
+        return collaborators.ToActionResult();
+    }
+
+    /* [HttpPost]
     public async Task<ActionResult<CreatedCollaboratorDTO>> Create([FromBody] CreateCollabDTO collabDto)
     {
         var createCollabDto = new CreateCollaboratorDTO(collabDto.UserId, collabDto.PeriodDateTime);
@@ -27,7 +35,7 @@ public class CollaboratorController : ControllerBase
         var collabCreated = await _collabService.Create(createCollabDto);
 
         return collabCreated.ToActionResult();
-    }
+    } */
 
 
     /*  [HttpPut]
@@ -40,13 +48,7 @@ public class CollaboratorController : ControllerBase
            return Ok(result);
        }
 
-       [HttpGet]
-       public async Task<ActionResult<IEnumerable<Guid>>> Get()
-       {
-           var collaborators = await _collabService.GetAll();
-
-           return collaborators.ToActionResult();
-       }
+       
 
        [HttpGet("details")]
        public async Task<ActionResult<IEnumerable<CollabDetailsDTO>>> GetAllInfo()

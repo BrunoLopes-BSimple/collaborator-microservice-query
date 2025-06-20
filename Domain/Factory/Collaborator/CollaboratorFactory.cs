@@ -39,5 +39,10 @@ namespace Domain.Factory
         {
             return new Collaborator(visitor.Id, visitor.UserId, visitor.PeriodDateTime);
         }
+
+        public Collaborator Create(Guid collabId, Guid userId, PeriodDateTime periodDateTime)
+        {
+            return new Collaborator(collabId, userId, periodDateTime);
+        }
     }
 }

@@ -12,49 +12,41 @@ public class CollaboratorService
 {
     private ICollaboratorRepository _collaboratorRepository;
     private ICollaboratorFactory _collaboratorFactory;
-    private readonly IMessagePublisher _publisher;
 
-    public CollaboratorService(ICollaboratorRepository collaboratorRepository, ICollaboratorFactory collaboratorFactory, IMessagePublisher messagePublisher)
+    public CollaboratorService(ICollaboratorRepository collaboratorRepository, ICollaboratorFactory collaboratorFactory)
     {
         _collaboratorRepository = collaboratorRepository;
         _collaboratorFactory = collaboratorFactory;
-        _publisher = messagePublisher;
     }
 
-    public async Task<Result<CreatedCollaboratorDTO>> Create(CreateCollaboratorDTO collabDto)
+    public async Task<ICollaborator?> AddCollaboratorReferenceAsync(Guid collabId, Guid userId, PeriodDateTime period)
     {
-        ICollaborator newCollab;
+        var collabAlreadyExists = await _collaboratorRepository.AlreadyExistsAsync(collabId);
+
+        if (collabAlreadyExists) return null;
+
+        var newCollab = _collaboratorFactory.Create(collabId, userId, period);
+
+        return await _collaboratorRepository.AddAsync(newCollab);
+    }
+
+    public async Task<Result<IEnumerable<Guid>>> GetAll()
+    {
         try
         {
-            newCollab = await _collaboratorFactory.Create(collabDto.UserId, collabDto.PeriodDateTime);
-            newCollab = await _collaboratorRepository.AddAsync(newCollab);
+            var collabs = await _collaboratorRepository.GetAllAsync();
+            var collabIds = collabs.Select(U => U.Id);
+
+            return Result<IEnumerable<Guid>>.Success(collabIds);
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            return Result<CreatedCollaboratorDTO>.Failure(Error.InternalServerError(ex.Message));
+            return Result<IEnumerable<Guid>>.Failure(Error.InternalServerError(e.Message));
         }
-
-        await _publisher.PublishCollaboratorCreatedAsync(newCollab);
-
-        var result = new CreatedCollaboratorDTO(newCollab.UserId, newCollab.Id,  newCollab.PeriodDateTime); 
-        return Result<CreatedCollaboratorDTO>.Success(result);
     }
 
     /*  // UC9 - Como gestor de RH, quero listar todos os colaboradores
-     public async Task<Result<IEnumerable<Guid>>> GetAll()
-     {
-         try
-         {
-             var collabs = await _collaboratorRepository.GetAllAsync();
-             var collabIds = collabs.Select(U => U.Id);
-
-             return Result<IEnumerable<Guid>>.Success(collabIds);
-         }
-         catch (Exception e)
-         {
-             return Result<IEnumerable<Guid>>.Failure(Error.InternalServerError(e.Message));
-         }
-     }
+     
 
      public async Task<Result<IEnumerable<CollabDetailsDTO>>> GetAllInfo()
      {
