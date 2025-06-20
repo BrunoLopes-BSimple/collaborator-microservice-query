@@ -12,7 +12,7 @@ public class Collaborator : ICollaborator
     {
         PeriodDateTime = periodDateTime;
         UserId = userId;
-        Id = new Guid();
+        Id = Guid.NewGuid();
     }
 
     public Collaborator(Guid id, Guid userId, PeriodDateTime periodDateTime)

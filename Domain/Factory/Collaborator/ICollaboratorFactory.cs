@@ -11,7 +11,6 @@ namespace Domain.Factory;
 public interface ICollaboratorFactory
 {
     Task<Collaborator> Create(Guid userId, PeriodDateTime periodDateTime);
-    Task<Collaborator> Create(IUser user, PeriodDateTime periodDateTime);
     Collaborator Create(ICollaboratorVisitor visitor);
 }
 

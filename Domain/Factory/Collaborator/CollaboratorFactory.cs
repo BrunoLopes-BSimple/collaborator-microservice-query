@@ -19,28 +19,20 @@ namespace Domain.Factory
 
         public async Task<Collaborator> Create(Guid userId, PeriodDateTime periodDateTime)
         {
-            IUser? user = _userRepository.GetById(userId);
+            var userExists = await _userRepository.Exists(userId);
+            if (!userExists)
+            {
+                throw new ArgumentException("User does not exist for the provided UserId.");
+            }
 
-            if (user == null)
-                throw new ArgumentException("User does not exist");
+            var collaboratorAlreadyExists = await _collabRepository.ExistsByUserIdAsync(userId);
+            if (collaboratorAlreadyExists)
+            {
+                throw new InvalidOperationException("A collaborator with this UserId already exists.");
+            }
 
-            return await Create((User)user, periodDateTime);
-        }
+            return new Collaborator(userId, periodDateTime);
 
-        public async Task<Collaborator> Create(IUser user, PeriodDateTime periodDateTime)
-        {
-            if (user.DeactivationDateIsBefore(periodDateTime._finalDate))
-                throw new ArgumentException("User deactivation date is before collaborator contract end date.");
-
-            if (user.IsDeactivated())
-                throw new ArgumentException("User is deactivated.");
-
-            Collaborator collab = new Collaborator(user.Id, periodDateTime);
-
-            if (await _collabRepository.IsRepeated(collab))
-                throw new ArgumentException("Collaborator already exists");
-
-            return collab;
         }
 
         public Collaborator Create(ICollaboratorVisitor visitor)

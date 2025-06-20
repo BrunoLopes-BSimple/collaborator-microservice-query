@@ -1,66 +1,67 @@
-using Moq;
-using Domain.IRepository;
+using Application.Messaging;
 using Application.Services;
-using Domain.Factory;
-using Infrastructure;
 using AutoMapper;
+using Domain.Factory;
+using Domain.IRepository;
+using Domain.Models;
+using Infrastructure;
+using Infrastructure.DataModel;
+using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 
 namespace Application.Tests.CollaboratorServiceTests
 {
-    public abstract class CollaboratorServiceTestBase
+    public abstract class CollaboratorServiceTestBase : IDisposable
     {
-        protected Mock<IAssociationProjectCollaboratorRepository> AssociationProjectCollaboratorRepositoryDouble;
-        protected Mock<IHolidayPlanRepository> HolidayPlanRepositoryDouble;
-        protected Mock<ICollaboratorRepository> CollaboratorRepositoryDouble;
-        protected Mock<IUserRepository> UserRepositoryDouble;
-        protected Mock<ICollaboratorFactory> CollaboratorFactoryDouble;
-        protected Mock<IUserFactory> UserFactoryDouble;
-        protected Mock<IAssociationTrainingModuleCollaboratorsRepository> AssociationTrainingModuleCollaboratorsRepositoryDouble;
-        protected Mock<ITrainingModuleRepository> TrainingModuleRepositoryDouble;
-        protected Mock<IProjectRepository> ProjectRepositoryDouble;
-        protected Mock<IHolidayPlanFactory> HolidayPlanFactoryDouble;
-        protected AbsanteeContext _context;
-        protected Mock<IMapper> MapperDouble;
-
-        protected CollaboratorService CollaboratorService;
-
-        private static readonly Random _random = new();
+        protected AbsanteeContext Context;
+        protected ICollaboratorRepository CollaboratorRepository;
+        protected Mock<ICollaboratorFactory> CollaboratorFactoryMock;
+        protected Mock<IMessagePublisher> MessagePublisherMock;
+        protected CollaboratorService Service;
+        protected Mock<IMapper> MapperMock; // Adicione esta linha para que o mock seja acessível
 
         protected CollaboratorServiceTestBase()
         {
             var options = new DbContextOptionsBuilder<AbsanteeContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
+            Context = new AbsanteeContext(options);
 
-            _context = new AbsanteeContext(options);
+            MapperMock = new Mock<IMapper>();
 
-            AssociationProjectCollaboratorRepositoryDouble = new Mock<IAssociationProjectCollaboratorRepository>();
-            HolidayPlanRepositoryDouble = new Mock<IHolidayPlanRepository>();
-            CollaboratorRepositoryDouble = new Mock<ICollaboratorRepository>();
-            UserRepositoryDouble = new Mock<IUserRepository>();
-            CollaboratorFactoryDouble = new Mock<ICollaboratorFactory>();
-            UserFactoryDouble = new Mock<IUserFactory>();
-            AssociationTrainingModuleCollaboratorsRepositoryDouble = new Mock<IAssociationTrainingModuleCollaboratorsRepository>();
-            TrainingModuleRepositoryDouble = new Mock<ITrainingModuleRepository>();
-            ProjectRepositoryDouble = new Mock<IProjectRepository>();
-            HolidayPlanFactoryDouble = new Mock<IHolidayPlanFactory>();
-            MapperDouble = new Mock<IMapper>();
+            // Adicione a configuração de mapeamento para Collaborator.
+            // Isto diz ao mock o que fazer quando o repositório pedir para mapear um Collaborator.
+            MapperMock.Setup(m => m.Map<Collaborator, CollaboratorDataModel>(It.IsAny<Collaborator>()))
+                      .Returns((Collaborator c) => new CollaboratorDataModel
+                      {
+                          Id = c.Id,
+                          UserId = c.UserId,
+                          PeriodDateTime = c.PeriodDateTime
+                      });
 
-            CollaboratorService = new CollaboratorService(
-                AssociationProjectCollaboratorRepositoryDouble.Object,
-                HolidayPlanRepositoryDouble.Object,
-                CollaboratorRepositoryDouble.Object,
-                UserRepositoryDouble.Object,
-                CollaboratorFactoryDouble.Object,
-                UserFactoryDouble.Object,
-                AssociationTrainingModuleCollaboratorsRepositoryDouble.Object,
-                TrainingModuleRepositoryDouble.Object,
-                ProjectRepositoryDouble.Object,
-                HolidayPlanFactoryDouble.Object,
-                _context,
-                MapperDouble.Object
+            // É também uma boa prática configurar o mapeamento inverso.
+            MapperMock.Setup(m => m.Map<CollaboratorDataModel, Collaborator>(It.IsAny<CollaboratorDataModel>()))
+                      .Returns((CollaboratorDataModel dm) => new Collaborator(dm.Id, dm.UserId, dm.PeriodDateTime));
+
+
+            // O repositório real agora recebe o mock do mapper configurado
+            CollaboratorRepository = new CollaboratorRepositoryEF(Context, MapperMock.Object);
+
+            CollaboratorFactoryMock = new Mock<ICollaboratorFactory>();
+            MessagePublisherMock = new Mock<IMessagePublisher>();
+
+            Service = new CollaboratorService(
+                CollaboratorRepository,
+                CollaboratorFactoryMock.Object,
+                MessagePublisherMock.Object
             );
+        }
+
+        public void Dispose()
+        {
+            Context.Database.EnsureDeleted();
+            Context.Dispose();
         }
     }
 }

@@ -15,20 +15,20 @@ public class UserFactory : IUserFactory
         _userRepository = userRepository;
     }
 
-    public async Task<User> Create(string names, string surnames, string email, DateTime deactivationDate)
+    public async Task<User?> Create(Guid id)
     {
-        var existingUser = await _userRepository.GetByEmailAsync(email);
+        var alreadyExists = await _userRepository.Exists(id);
 
-        if (existingUser != null)
+        if (alreadyExists)
         {
-            throw new ArgumentException("An user with this email already exists.");
+            return null;
         }
 
-        return new User(names, surnames, email, deactivationDate);
+        return new User(id);
     }
 
     public User Create(IUserVisitor userVisitor)
     {
-        return new User(userVisitor.Id, userVisitor.Names, userVisitor.Surnames, userVisitor.Email, userVisitor.PeriodDateTime);
+        return new User(userVisitor.Id);
     }
 }

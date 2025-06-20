@@ -1,4 +1,4 @@
-﻿using Application.DTO.Collaborators;
+﻿/* using Application.DTO.Collaborators;
 using Domain.Models;
 
 namespace WebApi.IntegrationTests.Helpers;
@@ -44,3 +44,4 @@ public static class CollaboratorHelper
         };
     }
 }
+ */

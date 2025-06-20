@@ -16,6 +16,12 @@ public class CollaboratorRepositoryEF : GenericRepositoryEF<ICollaborator, Colla
         _mapper = mapper;
     }
 
+    public async Task<bool> ExistsByUserIdAsync(Guid userId)
+    {
+        return await _context.Set<CollaboratorDataModel>()
+                             .AnyAsync(c => c.UserId == userId);
+    }
+
     public async Task<bool> IsRepeated(ICollaborator collaborator)
     {
         return await this._context.Set<CollaboratorDataModel>()
