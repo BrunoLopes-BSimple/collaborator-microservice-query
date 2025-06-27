@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AbsanteeContext))]
-    [Migration("20250620115042_newCenas")]
-    partial class newCenas
+    [Migration("20250627160721_Changes")]
+    partial class Changes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,9 +45,21 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Names")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Surnames")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
-                    b.ToTable("UserIds");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Infrastructure.DataModel.CollaboratorDataModel", b =>
@@ -69,6 +81,31 @@ namespace Infrastructure.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("CollaboratorDataModelId");
+                        });
+
+                    b.Navigation("PeriodDateTime")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Infrastructure.DataModel.UserDataModel", b =>
+                {
+                    b.OwnsOne("Domain.Models.PeriodDateTime", "PeriodDateTime", b1 =>
+                        {
+                            b1.Property<Guid>("UserDataModelId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<DateTime>("_finalDate")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<DateTime>("_initDate")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.HasKey("UserDataModelId");
+
+                            b1.ToTable("Users");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserDataModelId");
                         });
 
                     b.Navigation("PeriodDateTime")

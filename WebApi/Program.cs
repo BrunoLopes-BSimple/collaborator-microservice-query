@@ -1,4 +1,5 @@
 using Application.DTO.Collaborators;
+using Application.Interfaces;
 using Application.Messaging;
 using Application.Services;
 using Domain.Factory;
@@ -10,7 +11,6 @@ using Infrastructure.Resolvers;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Consumers;
-using WebApi.Consumers.Definition;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +23,7 @@ builder.Services.AddDbContext<AbsanteeContext>(opt =>
     );
 
 //Services
-builder.Services.AddTransient<CollaboratorService>();
+builder.Services.AddTransient<ICollaboratorService, CollaboratorService>();
 builder.Services.AddTransient<UserService>();
 
 //Repositories
@@ -52,12 +52,20 @@ builder.Services.AddAutoMapper(cfg =>
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<UserCreatedConsumer>();
-    x.AddConsumer<CollaboratorConsumer, CollaboratorConsumerDefinition>();
+    x.AddConsumer<CollaboratorConsumer>();
+    x.AddConsumer<CollaboratorUpdatedConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host("rabbitmq://localhost");
-        cfg.ConfigureEndpoints(context);
+        var instance = InstanceInfo.InstanceId;
+        cfg.ReceiveEndpoint($"collaborators-query-{instance}", e =>
+        {
+            e.ConfigureConsumer<CollaboratorConsumer>(context);
+            e.ConfigureConsumer<CollaboratorUpdatedConsumer>(context);
+            e.ConfigureConsumer<UserCreatedConsumer>(context);
+
+        });
     });
 });
 

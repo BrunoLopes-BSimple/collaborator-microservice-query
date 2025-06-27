@@ -6,9 +6,11 @@ using Application.DTO;
 using AutoMapper;
 using Infrastructure;
 using Application.Messaging;
+using Application.DTO.Collaborators;
+using Application.Interfaces;
 namespace Application.Services;
 
-public class CollaboratorService
+public class CollaboratorService : ICollaboratorService
 {
     private ICollaboratorRepository _collaboratorRepository;
     private ICollaboratorFactory _collaboratorFactory;
@@ -30,6 +32,20 @@ public class CollaboratorService
         return await _collaboratorRepository.AddAsync(newCollab);
     }
 
+    public async Task<ICollaborator?> UpdateCollaboratorReferenceAsync(Guid collabId, Guid userId, PeriodDateTime period)
+    {
+        var existingCollab = await _collaboratorRepository.GetByIdAsync(collabId);
+
+        if (existingCollab == null)
+        {
+            return null;
+        }
+
+        existingCollab.UpdatePeriod(period);
+
+        return await _collaboratorRepository.UpdateCollaborator(existingCollab);
+    }
+
     public async Task<Result<IEnumerable<Guid>>> GetAll()
     {
         try
@@ -42,6 +58,24 @@ public class CollaboratorService
         catch (Exception e)
         {
             return Result<IEnumerable<Guid>>.Failure(Error.InternalServerError(e.Message));
+        }
+    }
+
+    public async Task<Result<CollaboratorDTO>> GetById(Guid id)
+    {
+        try
+        {
+            var collab = await _collaboratorRepository.GetByIdAsync(id);
+            if (collab == null)
+                return Result<CollaboratorDTO>.Failure(Error.NotFound("User not found"));
+
+            var result = new CollaboratorDTO(collab.Id, collab.UserId, collab.PeriodDateTime);
+
+            return Result<CollaboratorDTO>.Success(result);
+        }
+        catch (Exception e)
+        {
+            return Result<CollaboratorDTO>.Failure(Error.InternalServerError(e.Message));
         }
     }
 
@@ -110,23 +144,7 @@ public class CollaboratorService
          return new CollabUpdatedDTO(dto.CollabId, dto.UserId, dto.Names, dto.Surnames, dto.Email, dto.UserPeriod, dto.CollaboratorPeriod);
      }
 
-     public async Task<Result<CollaboratorDTO>> GetById(Guid id)
-     {
-         try
-         {
-             var collab = await _collaboratorRepository.GetByIdAsync(id);
-             if (collab == null)
-                 return Result<CollaboratorDTO>.Failure(Error.NotFound("User not found"));
-             var result = _mapper.Map<CollaboratorDTO>(collab);
-
-             return Result<CollaboratorDTO>.Success(result);
-
-         }
-         catch (Exception e)
-         {
-             return Result<CollaboratorDTO>.Failure(Error.InternalServerError(e.Message));
-         }
-     }
+     
 
      public async Task<Result<CollabDetailsDTO>> GetDetailsById(Guid id)
      {

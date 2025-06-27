@@ -1,23 +1,28 @@
+using Application.DTO.Collaborators;
+using Application.DTO.Users;
 using Domain.Factory;
 using Domain.Interfaces;
 using Domain.IRepository;
 using Domain.Models;
+using Infrastructure.DataModel;
 
 namespace Application.Services
 {
     public class UserService
     {
-        private IUserRepository _userRepository;
-        private IUserFactory _userFactory;
+        private readonly IUserRepository _userRepository;
+        private readonly IUserFactory _userFactory;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, IUserFactory userFactory)
         {
             _userRepository = userRepository;
+            _userFactory = userFactory;
         }
 
-        public async Task<IUser?> AddUserReferenceAsync(Guid userId)
+        public async Task<IUser?> AddUserReferenceAsync(ReceivedUserDTO dto)
         {
-            var newUser = await _userFactory.Create(userId);
+            var visitor = new UserDataModel() { Id=dto.Id, Names = dto.Names, Surnames = dto.Surnames, Email = dto.Email, PeriodDateTime = dto.PeriodDateTime };
+            var newUser = _userFactory.Create(visitor);
 
             if (newUser == null) return null;
 

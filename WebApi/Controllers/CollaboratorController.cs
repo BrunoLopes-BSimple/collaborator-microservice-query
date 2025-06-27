@@ -1,5 +1,6 @@
 using Application.DTO;
 using Application.DTO.Collaborators;
+using Application.Interfaces;
 using Application.Services;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -10,11 +11,11 @@ namespace WebApi.Controllers;
 [ApiController]
 public class CollaboratorController : ControllerBase
 {
-    private readonly CollaboratorService _collabService;
+    private readonly ICollaboratorService _collabService;
     //private readonly HolidayPlanService _holidayPlanService;
     //private readonly AssociationProjectCollaboratorService _associationProjectCollaboratorService;
 
-    public CollaboratorController(CollaboratorService collabService)
+    public CollaboratorController(ICollaboratorService collabService)
     {
         _collabService = collabService;
     }
@@ -27,28 +28,15 @@ public class CollaboratorController : ControllerBase
         return collaborators.ToActionResult();
     }
 
-    /* [HttpPost]
-    public async Task<ActionResult<CreatedCollaboratorDTO>> Create([FromBody] CreateCollabDTO collabDto)
+    [HttpGet("{collaboratorId}")]
+    public async Task<ActionResult<CollaboratorDTO>> GetById(Guid collaboratorId)
     {
-        var createCollabDto = new CreateCollaboratorDTO(collabDto.UserId, collabDto.PeriodDateTime);
+        var collaborator = await _collabService.GetById(collaboratorId);
 
-        var collabCreated = await _collabService.Create(createCollabDto);
+        return collaborator.ToActionResult();
+    }
 
-        return collabCreated.ToActionResult();
-    } */
-
-
-    /*  [HttpPut]
-       public async Task<ActionResult<CollabUpdatedDTO>> updateCollaborator([FromBody] CollabDetailsDTO newCollabData)
-       {
-           var collabData = new CollabData(newCollabData.CollabId, newCollabData.UserId, newCollabData.Names, newCollabData.Surnames, newCollabData.Email, newCollabData.UserPeriod, newCollabData.CollaboratorPeriod);
-
-           var result = await _collabService.EditCollaborator(collabData);
-           if (result == null) return BadRequest("Invalid Arguments");
-           return Ok(result);
-       }
-
-       
+    /*
 
        [HttpGet("details")]
        public async Task<ActionResult<IEnumerable<CollabDetailsDTO>>> GetAllInfo()

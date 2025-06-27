@@ -6,7 +6,7 @@ namespace Infrastructure
     public class AbsanteeContext : DbContext
     {
         public virtual DbSet<CollaboratorDataModel> Collaborators { get; set; }
-        public DbSet<UserDataModel> ValidUserIds { get; set; }
+        public virtual DbSet<UserDataModel> Users { get; set; }
 
         public AbsanteeContext(DbContextOptions<AbsanteeContext> options) : base(options)
         {
@@ -14,10 +14,9 @@ namespace Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CollaboratorDataModel>()
-                .OwnsOne(a => a.PeriodDateTime);
+            modelBuilder.Entity<CollaboratorDataModel>().OwnsOne(a => a.PeriodDateTime);
 
-            modelBuilder.Entity<UserDataModel>().HasKey(v => v.Id);
+            modelBuilder.Entity<UserDataModel>().OwnsOne(a => a.PeriodDateTime);
 
             base.OnModelCreating(modelBuilder);
         }

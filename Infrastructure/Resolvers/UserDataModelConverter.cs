@@ -23,6 +23,8 @@ public class UserDataModelConverter : ITypeConverter<UserDataModel, User>
 
     {
         userDataModel.Id = userDomain.Id;
+        userDataModel.PeriodDateTime._initDate = userDomain.PeriodDateTime._initDate;
+        userDataModel.PeriodDateTime._finalDate = userDomain.PeriodDateTime._finalDate;
         return true;
     }
 }
