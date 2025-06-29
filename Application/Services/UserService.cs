@@ -1,5 +1,6 @@
 using Application.DTO.Collaborators;
 using Application.DTO.Users;
+using Application.Interfaces;
 using Domain.Factory;
 using Domain.Interfaces;
 using Domain.IRepository;
@@ -8,7 +9,7 @@ using Infrastructure.DataModel;
 
 namespace Application.Services
 {
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
         private readonly IUserFactory _userFactory;

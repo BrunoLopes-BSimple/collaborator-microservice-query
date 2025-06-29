@@ -12,5 +12,9 @@ namespace Domain.IRepository
     public interface IUserRepository : IGenericRepositoryEF<IUser, User, IUserVisitor>
     {
         Task<bool> Exists(Guid ID);
+        Task<IEnumerable<IUser>> GetByIdsAsync(List<Guid> userIdsOfCollab);
+        Task<IEnumerable<IUser>> GetByNamesAsync(string names);
+        Task<IEnumerable<IUser>> GetBySurnamesAsync(string surnames);
+        Task<IEnumerable<IUser>> GetByNamesAndSurnamesAsync(string names, string surnames);
     }
 }

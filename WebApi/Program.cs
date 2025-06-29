@@ -1,4 +1,5 @@
 using Application.DTO.Collaborators;
+using Application.DTO.Users;
 using Application.Interfaces;
 using Application.Messaging;
 using Application.Services;
@@ -24,7 +25,8 @@ builder.Services.AddDbContext<AbsanteeContext>(opt =>
 
 //Services
 builder.Services.AddTransient<ICollaboratorService, CollaboratorService>();
-builder.Services.AddTransient<UserService>();
+builder.Services.AddTransient<IUserService, UserService>();
+
 
 //Repositories
 builder.Services.AddTransient<IUserRepository, UserRepositoryEF>();
@@ -45,6 +47,7 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<DataModelMappingProfile>();
 
     //DTO
+    cfg.CreateMap<User, UserDTO>();
     cfg.CreateMap<Collaborator, CollaboratorDTO>();
 });
 
@@ -75,6 +78,12 @@ builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
