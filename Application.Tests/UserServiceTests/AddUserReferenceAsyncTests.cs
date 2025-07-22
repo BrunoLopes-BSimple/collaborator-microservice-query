@@ -1,9 +1,13 @@
-/* using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.DTO.Users;
+using Application.Services;
+using Domain.Factory;
 using Domain.Interfaces;
 using Domain.IRepository;
+using Domain.Models;
 using Infrastructure;
 using Infrastructure.DataModel;
 using Microsoft.EntityFrameworkCore;
@@ -11,48 +15,57 @@ using Moq;
 
 namespace Application.Tests.UserServiceTests
 {
-    public class AddUserReferenceAsyncTests : UserServiceTestBase
+    public class AddUserReferenceAsyncTests 
     {
         [Fact]
-        public async Task AddUserReferenceAsync_ShouldAddUser_WhenUserDoesNotExist()
+        public async Task AddUserReferenceAsync_ShouldReturnUser_WhenFactoryCreatesUserAndRepositoryAddsSuccessfully()
         {
-            // Arrange
-            var userId = Guid.NewGuid();
+            // arrange
+            var userRepoDouble = new Mock<IUserRepository>();
+            var userFactoryDouble = new Mock<IUserFactory>();
 
-            // Act
-            var result = await UserService.AddUserReferenceAsync(userId);
+            var period = new PeriodDateTime(DateTime.Now.AddDays(1), DateTime.Now.AddDays(50));
+            var dto = new ReceivedUserDTO(Guid.NewGuid(), "João", "Silva", "joao.silva@example.com", period);
 
-            // Assert
-            // 1. Verifica se o método retornou um objeto User
+            var userToCreate = new User(dto.Id, dto.Names, dto.Surnames, dto.Email, dto.PeriodDateTime);
+
+            userFactoryDouble.Setup(f => f.Create(It.IsAny<UserDataModel>())).Returns(userToCreate);
+            userRepoDouble.Setup(r => r.AddAsync(userToCreate)).ReturnsAsync(userToCreate);
+
+            var service = new UserService(userRepoDouble.Object, userFactoryDouble.Object);
+
+            // act
+            var result = await service.AddUserReferenceAsync(dto);
+
+            // assert
             Assert.NotNull(result);
-            Assert.Equal(userId, result.Id);
-
-            // 2. Verifica DIRETAMENTE na base de dados em memória se o registo foi criado
-            var userInDb = await Context.ValidUserIds.FirstOrDefaultAsync(u => u.Id == userId);
-            Assert.NotNull(userInDb);
-            Assert.Equal(userId, userInDb.Id);
+            Assert.Equal(dto.Id, result!.Id);
+            Assert.Equal(dto.Names, result.Names);
+            Assert.Equal(dto.Surnames, result.Surnames);
+            Assert.Equal(dto.Email, result.Email);
+            Assert.Equal(dto.PeriodDateTime, result.PeriodDateTime);
         }
 
         [Fact]
-        public async Task AddUserReferenceAsync_ShouldReturnNull_WhenUserAlreadyExists()
+        public async Task AddUserReferenceAsync_ShouldReturnNull_WhenFactoryReturnsNull()
         {
-            // Arrange
-            var userId = Guid.NewGuid();
+            // arrange
+            var userRepoDouble = new Mock<IUserRepository>();
+            var userFactoryDouble = new Mock<IUserFactory>();
 
-            // Adiciona previamente o utilizador à base de dados para simular a sua existência
-            Context.ValidUserIds.Add(new UserDataModel { Id = userId });
-            await Context.SaveChangesAsync();
+            var period = new PeriodDateTime(DateTime.Now.AddDays(1), DateTime.Now.AddDays(50));
+            var dto = new ReceivedUserDTO(Guid.NewGuid(), "João", "Silva", "joao.silva@example.com", period);
 
-            // Act
-            var result = await UserService.AddUserReferenceAsync(userId);
+            userFactoryDouble.Setup(f => f.Create(It.IsAny<UserDataModel>())).Returns((User?)null);
 
-            // Assert
-            // 1. O serviço deve retornar null, pois o utilizador já existia
+            var service = new UserService(userRepoDouble.Object, userFactoryDouble.Object);
+
+            // act
+            var result = await service.AddUserReferenceAsync(dto);
+
+            // assert
             Assert.Null(result);
-
-            // 2. Garante que não há duplicados na base de dados
-            var count = await Context.ValidUserIds.CountAsync(u => u.Id == userId);
-            Assert.Equal(1, count);
+            userRepoDouble.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never);
         }
     }
-} */
+}
