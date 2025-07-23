@@ -1,18 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+namespace Application.DTO.Users;
 
-namespace Application.DTO.Users
-{
-    public record UserDTO
-    {
-        public string Names { get; set; }
-        public string Surnames { get; set; }
-        public string Email { get; set; }
-        public DateTime FinalDate { get; set; }
-        public UserDTO()
-        {
-        }
-    }
-}
+public record UserDTO(string Names, string Surnames, string Email, DateTime FinalDate);
+

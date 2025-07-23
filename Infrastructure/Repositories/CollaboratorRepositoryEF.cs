@@ -35,11 +35,6 @@ public class CollaboratorRepositoryEF : GenericRepositoryEF<ICollaborator, Colla
                     && collaborator.PeriodDateTime._initDate <= c.PeriodDateTime._finalDate);
     }
 
-    public async Task<long> GetCount()
-    {
-        return await _context.Set<CollaboratorDataModel>().LongCountAsync();
-    }
-
     public override ICollaborator? GetById(Guid id)
     {
         var collabDM = this._context.Set<CollaboratorDataModel>()
@@ -80,18 +75,6 @@ public class CollaboratorRepositoryEF : GenericRepositoryEF<ICollaborator, Colla
         var collabsDm = await this._context.Set<CollaboratorDataModel>()
                     .Where(c => ids.Contains(c.UserId))
                     .ToListAsync();
-
-        var collabs = collabsDm.Select(c => _mapper.Map<CollaboratorDataModel, Collaborator>(c));
-
-        return collabs;
-    }
-
-    public async Task<IEnumerable<Collaborator>> GetActiveCollaborators()
-    {
-        // Usar DateTime.UtcNow para garantir consistência com UTC
-        var collabsDm = await _context.Set<CollaboratorDataModel>()
-                                .Where(c => c.PeriodDateTime._finalDate > DateTime.UtcNow)
-                                .ToListAsync();
 
         var collabs = collabsDm.Select(c => _mapper.Map<CollaboratorDataModel, Collaborator>(c));
 

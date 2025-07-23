@@ -3,7 +3,7 @@ using Application.Services;
 using Domain.Messages;
 using MassTransit;
 
-namespace WebApi.Consumers
+namespace InterfaceAdapters.Consumers
 {
     public class CollaboratorConsumer : IConsumer<CollaboratorCreatedMessage>
     {

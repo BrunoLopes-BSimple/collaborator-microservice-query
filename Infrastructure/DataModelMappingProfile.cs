@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Domain.Interfaces;
 using Domain.Models;
 using Infrastructure.DataModel;
 using Infrastructure.Resolvers;
@@ -14,7 +15,6 @@ public class DataModelMappingProfile : Profile
 
         CreateMap<Collaborator, CollaboratorDataModel>();
         CreateMap<CollaboratorDataModel, Collaborator>().ConvertUsing<CollaboratorDataModelConverter>();
-        
     }
 
 }

@@ -5,7 +5,7 @@ using Domain.Models;
 using System.Net;
 using Xunit;
 
-namespace WebApi.IntegrationTests.Tests;
+namespace InterfaceAdapters.IntegrationTests.Tests;
 
 
 

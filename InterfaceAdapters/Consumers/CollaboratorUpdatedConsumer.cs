@@ -2,7 +2,7 @@ using Application.Interfaces;
 using Domain.Messages;
 using MassTransit;
 
-namespace WebApi.Consumers
+namespace InterfaceAdapters.Consumers
 {
     public class CollaboratorUpdatedConsumer : IConsumer<CollaboratorUpdatedMessage>
     {

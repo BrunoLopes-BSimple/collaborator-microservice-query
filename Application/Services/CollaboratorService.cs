@@ -97,16 +97,7 @@ public class CollaboratorService : ICollaboratorService
 
                 if (user != null)
                 {
-                    resultList.Add(new CollabDetailsDTO
-                    {
-                        CollabId = collab.Id,
-                        UserId = user.Id,
-                        Names = user.Names,
-                        Surnames = user.Surnames,
-                        Email = user.Email,
-                        UserPeriod = user.PeriodDateTime,
-                        CollaboratorPeriod = collab.PeriodDateTime
-                    });
+                    resultList.Add(new CollabDetailsDTO(collab.Id, user.Id, user.Names, user.Surnames, user.Email, user.PeriodDateTime, collab.PeriodDateTime));
                 }
             }
 
@@ -131,16 +122,7 @@ public class CollaboratorService : ICollaboratorService
             if (user == null)
                 return Result<CollabDetailsDTO>.Failure(Error.NotFound("User not found"));
 
-            var result = new CollabDetailsDTO()
-            {
-                CollabId = collab.Id,
-                UserId = user.Id,
-                Names = user.Names,
-                Surnames = user.Surnames,
-                Email = user.Email,
-                UserPeriod = user.PeriodDateTime,
-                CollaboratorPeriod = collab.PeriodDateTime
-            };
+            var result = new CollabDetailsDTO(collab.Id, user.Id, user.Names, user.Surnames, user.Email, user.PeriodDateTime, collab.PeriodDateTime);
 
             return Result<CollabDetailsDTO>.Success(result);
         }

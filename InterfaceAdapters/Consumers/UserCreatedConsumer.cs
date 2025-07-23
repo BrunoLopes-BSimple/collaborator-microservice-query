@@ -4,7 +4,7 @@ using Application.Services;
 using Domain.Messages;
 using MassTransit;
 
-namespace WebApi.Consumers
+namespace InterfaceAdapters.Consumers
 {
     public class UserCreatedConsumer : IConsumer<UserCreatedMessage>
     {
@@ -18,7 +18,6 @@ namespace WebApi.Consumers
         public async Task Consume(ConsumeContext<UserCreatedMessage> context)
         {
 
-            Console.WriteLine($"XXX {context.Message.Names}");
             var receivedCollab = new ReceivedUserDTO(context.Message.Id, context.Message.Names, context.Message.Surnames, context.Message.Email, context.Message.PeriodDateTime);
 
             await _userService.AddUserReferenceAsync(receivedCollab);

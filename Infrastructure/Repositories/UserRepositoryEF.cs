@@ -99,4 +99,20 @@ public class UserRepositoryEF : GenericRepositoryEF<IUser, User, UserDataModel>,
         return usersDM.Select(u => _mapper.Map<User>(u));
     }
 
+    public async Task<IUser?> UpdateUser(IUser user)
+    {
+        var userDM = await _context.Set<UserDataModel>().FirstOrDefaultAsync(u => u.Id == user.Id);
+
+        if (userDM == null) return null;
+
+        userDM.Names = user.Names;
+        userDM.Surnames = user.Surnames;
+        userDM.Email = user.Email;
+        userDM.PeriodDateTime = user.PeriodDateTime;
+        _context.Entry(userDM).State = EntityState.Modified;
+
+        await _context.SaveChangesAsync();
+        return _mapper.Map<UserDataModel, User>(userDM);
+    }
+
 }
