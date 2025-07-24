@@ -45,7 +45,8 @@ public class CollaboratorService : ICollaboratorService
 
         existingCollab.UpdatePeriod(period);
 
-        return await _collaboratorRepository.UpdateCollaborator(existingCollab);
+        var result = await _collaboratorRepository.UpdateCollaborator(existingCollab);
+        return result;
     }
 
     public async Task<Result<IEnumerable<Guid>>> GetAll()
